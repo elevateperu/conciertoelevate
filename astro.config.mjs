@@ -6,6 +6,6 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: 'https://elevateperu.github.io',
-  base: '/',
+  base: 'conciertoelevate',
   integrations: [tailwind(), react()]
 });
