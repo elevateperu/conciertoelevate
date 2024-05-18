@@ -15,7 +15,9 @@ export default {
 		stone: "#231F20",
 		lime: "#B9FF66",
 		wine: "#A43232",
-		sweetwine: "#C06E70",
+		sweetwine: "#C29882",
+		blues: "#3E3F70",
+		plate: "#424948",
 		zinc: {
 		  100: "#F3F3F3",
 		  200: "#F0F0F0",

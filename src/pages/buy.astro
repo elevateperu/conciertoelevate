@@ -1,18 +1,15 @@
 ---
 import Container from "../components/Container.astro"
 import Layout from '../layouts/Layout.astro';
-import Contact from "../components/Contact.astro";
----
+import FormRegister from '../components/FormRegister.jsx'
 
+---
 <Layout title="Información de entrada">
 	<main class="space-y-20">
 		<Container>
             <Container>
-                    <Contact/>
-                    <div class="flex items-center md:justify-end py-5 md:w-6/12 md:pb-20 md:pt-10">
-                        <img src="/Banner.jpeg" width="100%" alt="Hero" class="rounded-xl md:w-3/4"/>
-                    </div>
-                </div>
-                </Container>
+                    <FormRegister client:only="react" />
+
+            </Container>
 	</main>
 </Layout>
