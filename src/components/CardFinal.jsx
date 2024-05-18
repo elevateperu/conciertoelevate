@@ -3,7 +3,7 @@ import Ticket from "./Ticket";
 
 const CardFinal = ({ cantidad, data, children }) => {
   return (
-    <div className="grid grid-cols-2">
+    <div className="grid grid-cols-1 md:grid-cols-2">
       <div>
         <h1 className="text-3xl text-plate">
           Información de apoderado de los tickets
