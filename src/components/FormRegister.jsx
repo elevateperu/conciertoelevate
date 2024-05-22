@@ -4,6 +4,9 @@ import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import axios from "axios";
 import Ticket from "./Ticket";
 import CardFinal from "./CardFinal";
+import * as htmlToImage from "html-to-image"
+import QRCode from "react-qr-code";
+import Entrada from "./Entrada";
 
 export default function FormRegister() {
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -90,6 +93,9 @@ export default function FormRegister() {
   };
   return (
     <>
+    <Entrada>
+      <QRCode value="123123" size={300}/>
+    </Entrada>
       {(!valid && (
         <div className="flex flex-col-reverse md:grid md:grid-cols-2 pt-[60px]">
           <form
