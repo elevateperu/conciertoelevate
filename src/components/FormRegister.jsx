@@ -6,6 +6,9 @@ import Ticket from "./Ticket";
 import CardFinal from "./CardFinal";
 
 export default function FormRegister() {
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  console.log(params)
   initMercadoPago(PUBLIC_KEY_MP, {
     locale: "es-PE",
   });
@@ -88,7 +91,7 @@ export default function FormRegister() {
   return (
     <>
       {(!valid && (
-        <div class="flex flex-col-reverse md:grid md:grid-cols-2 pt-[60px]">
+        <div className="flex flex-col-reverse md:grid md:grid-cols-2 pt-[60px]">
           <form
             onSubmit={handleSubmit}
             className="relative space-y-8"
@@ -188,7 +191,7 @@ export default function FormRegister() {
             
           </form>
           <div>
-            <div class="flex flex-col py-5 md:pb-10">
+            <div className="flex flex-col py-5 md:pb-10">
               <Ticket cantidad={cantidad} />
               <div className="self-center flex gap-4 pt-4">
                 <button
@@ -227,6 +230,20 @@ export default function FormRegister() {
             )}
           </CardFinal>
           
+        </div>
+      )}
+      {params.id && (
+        <div className="absolute bg-black/70  w-full h-full top-0 left-0 backdrop-blur-lg flex justify-center items-center">
+          <div className="bg-[url('/priscilla.JPG')] bg-cover rounded-lg text-plate overflow-hidden">
+            <div className=" flex flex-col items-center gap-8 backdrop-blur-md  p-4 ">
+            <p className="text-4xl">Gracias por la compra</p>
+            <p className="text-xl">Te enviaremos un correo electrónico <br/> con tus entradas al concierto</p>
+            <a class="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex" rel="noopener noreferrer"  href="/">
+                <h2 class="text-center text-xl font-normal leading-7">Aceptar</h2>
+            </a>
+            </div>
+            
+          </div>
         </div>
       )}
     </>

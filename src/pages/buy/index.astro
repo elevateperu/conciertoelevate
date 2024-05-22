@@ -1,7 +1,7 @@
 ---
-import Container from "../components/Container.astro"
-import Layout from '../layouts/Layout.astro';
-import FormRegister from '../components/FormRegister.jsx'
+import Container from "../../components/Container.astro"
+import Layout from '../../layouts/Layout.astro';
+import FormRegister from '../../components/FormRegister.jsx'
 
 ---
 <Layout title="Información de entrada">
@@ -9,7 +9,6 @@ import FormRegister from '../components/FormRegister.jsx'
 		<Container>
             <Container>
                     <FormRegister client:only="react" />
-
             </Container>
 	</main>
 </Layout>
