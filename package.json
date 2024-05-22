@@ -13,6 +13,7 @@
     "@astrojs/check": "^0.5.10",
     "@astrojs/react": "^3.3.4",
     "@astrojs/tailwind": "^5.1.0",
+    "@emailjs/browser": "^4.3.3",
     "@mercadopago/sdk-react": "^0.0.19",
     "@types/react": "^18.2.5",
     "@types/react-dom": "^18.2.3",
