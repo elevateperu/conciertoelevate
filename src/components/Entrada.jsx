@@ -2,13 +2,14 @@ import React from "react";
 
 const Entrada = ({ children }) => {
   return (
-    <div className="ticket max-w-sm mx-auto bg-[url('/priscilla.JPG')] bg-cover shadow-lg rounded-lg overflow-hidden font-semibold text-black">
+    <div className="ticket max-w-sm mx-auto text-plate bg-[#f2f2f2] bg-cover shadow-lg rounded-lg overflow-hidden font-semibold">
       <div className="backdrop-blur-sm">
         <div className="border-b border-dashed border-plate ">
           <div className="bg-gray-800 p-4">
-            <h2 className="text-2xl text-blues font-bold">
-              Priscilla TOUR 2024 Perú
-            </h2>
+            <div className="flex justify-between items-center">
+              <img src="/Logo.png" alt="poster" className="w-36 h-auto" />
+              <img src="/poster.png" alt="poster" className="w-28" />
+            </div>
             <p className="text-gray-400">Artista: Priscilla Bueno</p>
           </div>
           <div className="p-4">
@@ -34,11 +35,8 @@ const Entrada = ({ children }) => {
           <div>
             <p>35 s/</p>
           </div>
-
         </div>
-        <div>
-            {children}
-          </div>
+        <div className="flex justify-center pb-8">{children}</div>
       </div>
     </div>
   );

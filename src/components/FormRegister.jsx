@@ -5,8 +5,11 @@ import axios from "axios";
 import Ticket from "./Ticket";
 import CardFinal from "./CardFinal";
 import * as htmlToImage from "html-to-image"
+import emailjs from '@emailjs/browser';
 import QRCode from "react-qr-code";
 import Entrada from "./Entrada";
+import ReactPDF from '@react-pdf/renderer';
+import Pdf from "./Pdf";
 
 export default function FormRegister() {
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -31,6 +34,8 @@ export default function FormRegister() {
     codeTransaction: "",
   });
 
+
+
   function handleSubmit(event) {
     setLoad(true);
     event.preventDefault();
@@ -50,7 +55,6 @@ export default function FormRegister() {
 
   const createPreference = async () => {
     const data = JSON.stringify(dataForm);
-    console.log("dataaas", data);
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -77,9 +81,22 @@ export default function FormRegister() {
   };
 
   useEffect(() => {
-    console.log(dataForm);
     handleBuy();
   }, [dataForm]);
+
+  // useEffect(() => {
+  //   const node = document.querySelector('#entrada')
+  // htmlToImage.toPng(node)
+  // .then(function (dataUrl) {
+  //   var img = new Image();
+  //   img.src = dataUrl;
+  //   document.body.appendChild(img);
+
+  // })
+  // .catch(function (error) {
+  //   console.error('oops, something went wrong!', error);
+  // });
+  // }, []);
 
   const handleBuy = async () => {
     const id = await createPreference();
@@ -91,11 +108,17 @@ export default function FormRegister() {
   const handleTickets = (q) => {
     setCantidad(cantidad + q);
   };
+
+  const handleDownloadPDF = () => {
+    ReactPDF.render(<Pdf/>,`/ticket.pdf`)
+  }
   return (
     <>
-    <Entrada>
-      <QRCode value="123123" size={300}/>
-    </Entrada>
+    {/* <div id="entrada">
+      <Entrada>
+        <QRCode value="1" size={300}/>
+      </Entrada>
+    </div> */}
       {(!valid && (
         <div className="flex flex-col-reverse md:grid md:grid-cols-2 pt-[60px]">
           <form
@@ -244,9 +267,12 @@ export default function FormRegister() {
             <div className=" flex flex-col items-center gap-8 backdrop-blur-md  p-4 ">
             <p className="text-4xl">Gracias por la compra</p>
             <p className="text-xl">Te enviaremos un correo electrónico <br/> con tus entradas al concierto</p>
-            <a class="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex" rel="noopener noreferrer"  href="/">
-                <h2 class="text-center text-xl font-normal leading-7">Aceptar</h2>
-            </a>
+            <div>
+              <a className="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex" rel="noopener noreferrer"  href="/">
+                  <h2 className="text-center text-xl font-normal leading-7">Aceptar</h2>
+              </a>
+              <button onClick={handleDownloadPDF} className="p-4 bg-wine text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex">Descargar mi entrada</button>
+            </div>
             </div>
             
           </div>
