@@ -28,6 +28,7 @@ export default function FormRegister() {
   const formEl = useRef();
   const toImageElem = useRef();
   const [load, setLoad] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [valid, setValid] = useState(false);
   const [validTickets, setValidTickets] = useState(false);
   const [cantidad, setCantidad] = useState(1);
@@ -36,6 +37,8 @@ export default function FormRegister() {
   const [showButton, setShowButton] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [viewTickets, setViewTickets] = useState(false);
+  const link = useRef();
+  const [dataEmail, setDataEmail] = useState({});
   const [listIdQr, setListIdQr] = useState([
     {
       incomeStatus: false,
@@ -78,18 +81,7 @@ export default function FormRegister() {
   const createPreference = async () => {
     const data = JSON.stringify(dataForm);
     console.log(data);
-    emailjs
-      .sendForm("service_pbl292h", "template_gkwc0l8", dataForm, {
-        publicKey: "mCuLQJtjwLvuqp61a",
-      })
-      .then(
-        () => {
-          console.log("SUCCESS!");
-        },
-        (error) => {
-          console.log("FAILED...", error.text);
-        }
-      );
+
     if (dataForm.quantity > 0 && dataForm.nameUser != "") {
       let config = {
         method: "post",
@@ -142,7 +134,7 @@ export default function FormRegister() {
                 : "Error en el pago",
             description:
               dataRes.status === "approved"
-                ? "Te enviaremos un correo electrónico con tus entradas al concierto"
+                ? "Puedes ver tus entradas, descargarlas o enviar a tu correo, ¡Click en el siguiente botón!"
                 : "Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle",
           });
           if (dataRes.status == "approved") {
@@ -150,6 +142,7 @@ export default function FormRegister() {
           }
           console.log(response.data.tickets);
           setListIdQr(response.data.tickets);
+          setDataEmail(response.data);
         })
         .catch(function (error) {
           console.log(error, "error chloe llorana");
@@ -170,6 +163,7 @@ export default function FormRegister() {
 
   const handleCreatePDF = async () => {
     await setViewTickets(true);
+    setLoading(true);
     setTimeout(() => {
       htmlToImage
         .toPng(toImageElem.current)
@@ -182,12 +176,66 @@ export default function FormRegister() {
         .catch(function (error) {
           console.error("oops, something went wrong!", error);
         })
-        .finally(function (){
+        .finally(function () {
           setShowButton(true);
+          setLoading(false);
         });
-        
     }, 2000);
   };
+
+  const handleSendEmail = () => {
+    setLoading(true);
+    const blob = document.querySelector("#link").href;
+    let urlPDF;
+    console.log({ dataEmail });
+    fetch(blob)
+      .then((response) => response.blob())
+      .then((blob) => blobToBase64(blob))
+      .then((base64String) => {
+        emailjs
+          .send(
+            "service_pbl292h",
+            "template_gkwc0l8",
+            {
+              nameUser: dataEmail.nameUser,
+              lastName: dataEmail.lastName,
+              email: dataEmail.email,
+              pdf: base64String,
+            },
+            {
+              publicKey: "mCuLQJtjwLvuqp61a",
+            }
+          )
+          .then(
+            () => {
+              console.log("SUCCESS!");
+              setLoading(false);
+              alert("Correo enviado");
+            },
+            (error) => {
+              console.log("FAILED...", error.text);
+              setLoading(false);
+              alert("Error al enviar correo");
+            }
+          );
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setLoading(false);
+        alert("Hubo un error al generar su ticket");
+      });
+  };
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 
   return (
     <>
@@ -216,6 +264,7 @@ export default function FormRegister() {
               <input
                 type="text"
                 id="name"
+                name="nameUser"
                 className="shadow-sm bg-white border text-black text-base rounded-lg focus:ring-blues focus:border-blues block w-full p-2.5"
                 placeholder="Nombre"
                 required
@@ -231,6 +280,7 @@ export default function FormRegister() {
               <input
                 type="text"
                 id="lastname"
+                name="lastName"
                 className="shadow-sm bg-white border text-black text-base rounded-lg focus:ring-blues focus:border-blues block w-full p-2.5"
                 placeholder="Apellido"
                 required
@@ -246,6 +296,7 @@ export default function FormRegister() {
               <input
                 type="text"
                 id="dni"
+                name="dni"
                 className="shadow-sm bg-white border text-black text-base rounded-lg focus:ring-blues focus:border-blues block w-full p-2.5"
                 placeholder="Nro Documento"
                 required
@@ -261,6 +312,7 @@ export default function FormRegister() {
               <input
                 type="email"
                 id="email"
+                name="email"
                 className="block p-3 w-full text-base text-black bg-white rounded-lg border shadow-sm focus:ring-blues focus:border-blues"
                 placeholder="Email"
                 required
@@ -276,6 +328,7 @@ export default function FormRegister() {
               <input
                 type="tel"
                 id="tlf"
+                name="tlf"
                 className="block p-3 w-full text-base text-black bg-white rounded-lg border shadow-sm focus:ring-blues focus:border-blues"
                 placeholder="Teléfono"
                 required
@@ -355,15 +408,25 @@ export default function FormRegister() {
                   </div>
                 </div>
                 {showButton && (
-                  <PDFDownloadLink
-                    document={<Pdf images={listQR}></Pdf>}
-                    fileName="tickets.pdf"
-                    className="bg-wine p-4 text-white rounded-xl"
-                  >
-                    {({ blob, url, loading, error }) =>
-                      loading ? "Loading document..." : "Descargar PDF"
-                    }
-                  </PDFDownloadLink>
+                  <div>
+                    <PDFDownloadLink
+                      document={<Pdf images={listQR}></Pdf>}
+                      fileName="tickets.pdf"
+                      className="bg-wine p-4 text-white rounded-xl"
+                      ref={link}
+                      id="link"
+                    >
+                      {({ blob, url, loading, error }) =>
+                        loading ? "Loading document..." : "Descargar PDF"
+                      }
+                    </PDFDownloadLink>
+                    <button
+                      onClick={handleSendEmail}
+                      className="bg-blues p-4 text-white rounded-xl"
+                    >
+                      Enviar a mi correo
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -381,7 +444,7 @@ export default function FormRegister() {
                   onClick={() => setOpenModal(false)}
                 >
                   <h2 className="text-center text-xl font-normal leading-7">
-                    Aceptar
+                    Ver mis entradas
                   </h2>
                 </span>
                 {/* <PDFDownloadLink
@@ -395,6 +458,11 @@ export default function FormRegister() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+      {loading && (
+        <div className="absolute bg-black/70 flex justify-center items-center top-0 left-0 w-full h-full z-[999999999999]">
+          <p className="bg-[#f2f2f2] text-xl p-4 rounded-xl">Cargando...</p>
         </div>
       )}
     </>
