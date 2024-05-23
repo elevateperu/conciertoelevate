@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { URL, PATHS, PUBLIC_KEY_MP } from "../constants/url";
+import { URL, PATHS, PUBLIC_KEY_MP, } from "../constants/url";
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import axios from "axios";
 import Ticket from "./Ticket";
@@ -23,6 +23,10 @@ export default function FormRegister() {
   const [valid, setValid] = useState(false);
   const [cantidad, setCantidad] = useState(1);
   const [preferenceId, setPreferenceId] = useState(null);
+  const [dataModal, setDataModal] = useState({
+    title:'',
+    description: ''
+  })
   const [dataForm, setDataForm] = useState({
     quantity: 0,
     price: 35,
@@ -67,29 +71,32 @@ export default function FormRegister() {
         console.log('FAILED...', error.text);
       },
     );
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: URL.PATH_BASE + PATHS.PATH_CREATE_TICKET_NO_MP,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-        const { idMercadoPago } = response.data;
-        setPreferenceId(idMercadoPago);
-        setValid(true)
-        return idMercadoPago;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    setLoad(false);
+    if(dataForm.quantity > 0 && dataForm.nameUser != ''){
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: URL.PATH_BASE + PATHS.PATH_CREATE_TICKET_NO_MP,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+  
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(response.data);
+          const { idMercadoPago } = response.data;
+          setPreferenceId(idMercadoPago);
+          setValid(true)
+          return idMercadoPago;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      setLoad(false);
+    }
+    
   };
 
   useEffect(() => {
@@ -97,15 +104,44 @@ export default function FormRegister() {
   }, [dataForm]);
 
   useEffect(() => {
-    const node = document.querySelector('#entrada')
-  htmlToImage.toPng(node)
-  .then(function (dataUrl) {
-    var img = new Image();
-    img.src = dataUrl;
-    document.body.appendChild(img)  })
-  .catch(function (error) {
-    console.error('oops, something went wrong!', error);
-  });
+    console.log('si nooo ')
+    if(params.id){
+      var data = JSON.stringify({
+        "id": params.id.toString()
+      })
+      console.log(data, '***')
+      var config = {
+        method: 'get',
+        url: "https://www.conciertoelevate.com/getTicketByIdMercadoPago",
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        data : data
+      };
+      console.log(config, 'config')
+      
+      axios(config)
+      .then(function (response) {
+        const dataRes = response.data
+        setDataModal({
+          title: dataRes.status == 'approved' ? 'Gracias por la compra' : 'Error en el pago',
+          description: dataRes.status == 'approved' ? 'Te enviaremos un correo electrónico <br/> con tus entradas al concierto' : 'Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle',
+        })
+        console.log(JSON.stringify(response.data));
+      })
+      .catch(function (error) {
+        console.log(error, 'error chloe llorana');
+      });
+    }
+  // const node = document.querySelector('#entrada')
+  // htmlToImage.toPng(node)
+  // .then(function (dataUrl) {
+  //   var img = new Image();
+  //   img.src = dataUrl;
+  //   document.body.appendChild(img)  })
+  // .catch(function (error) {
+  //   console.error('oops, something went wrong!', error);
+  // });
   }, []);
 
   const handleBuy = async () => {
@@ -275,8 +311,8 @@ export default function FormRegister() {
         <div className="absolute bg-black/70  w-full h-full top-0 left-0 backdrop-blur-lg flex justify-center items-center">
           <div className="bg-[url('/priscilla.JPG')] bg-cover rounded-lg text-plate overflow-hidden">
             <div className=" flex flex-col items-center gap-8 backdrop-blur-md  p-4 ">
-            <p className="text-4xl">Gracias por la compra</p>
-            <p className="text-xl">Te enviaremos un correo electrónico <br/> con tus entradas al concierto</p>
+            <p className="text-4xl">{dataModal.title}</p>
+            <p className="text-xl">{dataModal.description}</p>
             <div>
               <a className="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex" rel="noopener noreferrer"  href="/">
                   <h2 className="text-center text-xl font-normal leading-7">Aceptar</h2>

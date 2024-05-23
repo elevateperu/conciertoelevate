@@ -3,7 +3,8 @@ export const URL = {
 }
 
 export const PATHS = {
-    PATH_CREATE_TICKET_NO_MP: '/order'
+    PATH_CREATE_TICKET_NO_MP: '/order',
+    PATH_GET_BY_ID_MERCADO: '/getTicketByIdMercadoPago'
 }
 
 export const PUBLIC_KEY_MP = 'APP_USR-3e58b88f-9b21-41ec-8cd7-c0e2ff46bcfe'
