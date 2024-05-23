@@ -49,6 +49,7 @@ export default function FormRegister() {
   const [dataModal, setDataModal] = useState({
     title: "",
     description: "",
+    button: "",
   });
   const [dataForm, setDataForm] = useState({
     quantity: 0,
@@ -136,6 +137,10 @@ export default function FormRegister() {
               dataRes.status === "approved"
                 ? "Puedes ver tus entradas, descargarlas o enviar a tu correo, ¡Click en el siguiente botón!"
                 : "Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle",
+            button:
+              dataRes.status === "approved"
+                ? "Ver mis entradas"
+                : "Aceptar",
           });
           if (dataRes.status == "approved") {
             setValidTickets(true);
@@ -444,7 +449,7 @@ export default function FormRegister() {
                   onClick={() => setOpenModal(false)}
                 >
                   <h2 className="text-center text-xl font-normal leading-7">
-                    Ver mis entradas
+                    {dataModal.button}
                   </h2>
                 </span>
                 {/* <PDFDownloadLink
