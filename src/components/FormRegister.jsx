@@ -55,6 +55,18 @@ export default function FormRegister() {
 
   const createPreference = async () => {
     const data = JSON.stringify(dataForm);
+    console.log(data)
+    emailjs.sendForm('service_pbl292h', 'template_gkwc0l8' , dataForm, {
+      publicKey: 'mCuLQJtjwLvuqp61a'
+    })
+    .then(
+      () => {
+        console.log('SUCCESS!');
+      },
+      (error) => {
+        console.log('FAILED...', error.text);
+      },
+    );
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -84,19 +96,17 @@ export default function FormRegister() {
     handleBuy();
   }, [dataForm]);
 
-  // useEffect(() => {
-  //   const node = document.querySelector('#entrada')
-  // htmlToImage.toPng(node)
-  // .then(function (dataUrl) {
-  //   var img = new Image();
-  //   img.src = dataUrl;
-  //   document.body.appendChild(img);
-
-  // })
-  // .catch(function (error) {
-  //   console.error('oops, something went wrong!', error);
-  // });
-  // }, []);
+  useEffect(() => {
+    const node = document.querySelector('#entrada')
+  htmlToImage.toPng(node)
+  .then(function (dataUrl) {
+    var img = new Image();
+    img.src = dataUrl;
+    document.body.appendChild(img)  })
+  .catch(function (error) {
+    console.error('oops, something went wrong!', error);
+  });
+  }, []);
 
   const handleBuy = async () => {
     const id = await createPreference();
@@ -271,7 +281,7 @@ export default function FormRegister() {
               <a className="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex" rel="noopener noreferrer"  href="/">
                   <h2 className="text-center text-xl font-normal leading-7">Aceptar</h2>
               </a>
-              <button onClick={handleDownloadPDF} className="p-4 bg-wine text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex">Descargar mi entrada</button>
+
             </div>
             </div>
             
