@@ -106,7 +106,31 @@ export default function FormRegister() {
   useEffect(() => {
     console.log('si nooo ')
     if(params.id){
-      var data = JSON.stringify({
+
+      //const params = params.id//{ id: params.id }; // Ejemplo de parámetro
+      const url = `https://www.conciertoelevate.com/getTicketByIdMercadoPago?id=${encodeURIComponent(params.id)}`;
+      
+      const config = {
+        method: 'get',
+        url: url,
+        
+      };
+      console.log(config, 'config');
+      
+      axios(config)
+        .then(function (response) {
+          const dataRes = response.data;
+          setDataModal({
+            title: dataRes.status === 'approved' ? 'Gracias por la compra' : 'Error en el pago',
+            description: dataRes.status === 'approved' ? 'Te enviaremos un correo electrónico <br/> con tus entradas al concierto' : 'Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle',
+          });
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          console.log(error, 'error chloe llorana');
+        });
+
+     /* var data = JSON.stringify({
         "id": params.id.toString()
       })
       console.log(data, '***')
@@ -116,7 +140,7 @@ export default function FormRegister() {
         headers: { 
           'Content-Type': 'application/json'
         },
-        data : data
+        body : data
       };
       console.log(config, 'config')
       
@@ -131,7 +155,7 @@ export default function FormRegister() {
       })
       .catch(function (error) {
         console.log(error, 'error chloe llorana');
-      });
+      });*/
     }
   // const node = document.querySelector('#entrada')
   // htmlToImage.toPng(node)
