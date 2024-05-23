@@ -1,5 +1,5 @@
 import React from 'react'
-import { Page, View, Document, StyleSheet } from "@react-pdf/renderer";
+import { Page, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   page: {
@@ -13,15 +13,14 @@ const styles = StyleSheet.create({
   }
 });
 
-function Pdf({children}) {
+function Pdf({images = []}) {
+    console.log("datasaasas",images)
   return (
     <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <img src="/poster.png" alt="" />
-        <img src="/poster.png" alt="" />
-        <img src="/poster.png" alt="" />
-      </View>
+    <Page size={{width:840, height:6000}} style={styles.page}>
+        {images && images.map((item, key) => (
+            <Image src={item} key={key} />
+        ))}
     </Page>
   </Document>
   )

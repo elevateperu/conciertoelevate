@@ -10,6 +10,13 @@ import QRCode from "react-qr-code";
 import Entrada from "./Entrada";
 import ReactPDF from "@react-pdf/renderer";
 import Pdf from "./Pdf";
+import {
+  PDFDownloadLink,
+  Page,
+  View,
+  Document,
+  StyleSheet,
+} from "@react-pdf/renderer";
 
 export default function FormRegister() {
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -19,10 +26,23 @@ export default function FormRegister() {
     locale: "es-PE",
   });
   const formEl = useRef();
+  const toImageElem = useRef();
   const [load, setLoad] = useState(false);
   const [valid, setValid] = useState(false);
+  const [validTickets, setValidTickets] = useState(false);
   const [cantidad, setCantidad] = useState(1);
   const [preferenceId, setPreferenceId] = useState(null);
+  const [listQR, setListQR] = useState([]);
+  const [showButton, setShowButton] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [viewTickets, setViewTickets] = useState(false);
+  const [listIdQr, setListIdQr] = useState([
+    {
+      incomeStatus: false,
+      ticketId: "0",
+      _id: "0",
+    },
+  ]);
   const [dataModal, setDataModal] = useState({
     title: "",
     description: "",
@@ -102,68 +122,39 @@ export default function FormRegister() {
   }, [dataForm]);
 
   useEffect(() => {
-    console.log('si nooo ')
-    if(params.id){
+    if (params.id) {
+      setOpenModal(true);
+      const url = `https://www.conciertoelevate.com/getTicketByIdMercadoPago?id=${encodeURIComponent(
+        params.id
+      )}`;
 
-      //const params = params.id//{ id: params.id }; // Ejemplo de parámetro
-      const url = `https://www.conciertoelevate.com/getTicketByIdMercadoPago?id=${encodeURIComponent(params.id)}`;
-      
       const config = {
-        method: 'get',
+        method: "get",
         url: url,
-        
       };
-      console.log(config, 'config');
-      
       axios(config)
         .then(function (response) {
           const dataRes = response.data;
           setDataModal({
-            title: dataRes.status === 'approved' ? 'Gracias por la compra' : 'Error en el pago',
-            description: dataRes.status === 'approved' ? 'Te enviaremos un correo electrónico <br/> con tus entradas al concierto' : 'Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle',
+            title:
+              dataRes.status === "approved"
+                ? "Gracias por la compra"
+                : "Error en el pago",
+            description:
+              dataRes.status === "approved"
+                ? "Te enviaremos un correo electrónico con tus entradas al concierto"
+                : "Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle",
           });
-          console.log(JSON.stringify(response.data));
+          if (dataRes.status == "approved") {
+            setValidTickets(true);
+          }
+          console.log(response.data.tickets);
+          setListIdQr(response.data.tickets);
         })
         .catch(function (error) {
-          console.log(error, 'error chloe llorana');
+          console.log(error, "error chloe llorana");
         });
-
-     /* var data = JSON.stringify({
-        "id": params.id.toString()
-      })
-      console.log(data, '***')
-      var config = {
-        method: 'get',
-        url: "https://www.conciertoelevate.com/getTicketByIdMercadoPago",
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body : data
-      };
-      console.log(config, 'config')
-      
-      axios(config)
-      .then(function (response) {
-        const dataRes = response.data
-        setDataModal({
-          title: dataRes.status == 'approved' ? 'Gracias por la compra' : 'Error en el pago',
-          description: dataRes.status == 'approved' ? 'Te enviaremos un correo electrónico <br/> con tus entradas al concierto' : 'Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle',
-        })
-        console.log(JSON.stringify(response.data));
-      })
-      .catch(function (error) {
-        console.log(error, 'error chloe llorana');
-      });*/
     }
-    // const node = document.querySelector('#entrada')
-    // htmlToImage.toPng(node)
-    // .then(function (dataUrl) {
-    //   var img = new Image();
-    //   img.src = dataUrl;
-    //   document.body.appendChild(img)  })
-    // .catch(function (error) {
-    //   console.error('oops, something went wrong!', error);
-    // });
   }, []);
 
   const handleBuy = async () => {
@@ -177,17 +168,30 @@ export default function FormRegister() {
     setCantidad(cantidad + q);
   };
 
-  const handleDownloadPDF = () => {
-    ReactPDF.render(<Pdf />, `/ticket.pdf`);
+  const handleCreatePDF = async () => {
+    await setViewTickets(true);
+    setTimeout(() => {
+      htmlToImage
+        .toPng(toImageElem.current)
+        .then(function (dataUrl) {
+          var img = new Image();
+          img.src = dataUrl;
+          console.log(dataUrl);
+          setListQR([dataUrl]);
+        })
+        .catch(function (error) {
+          console.error("oops, something went wrong!", error);
+        })
+        .finally(function (){
+          setShowButton(true);
+        });
+        
+    }, 2000);
   };
+
   return (
     <>
-      {/* <div id="entrada">
-      <Entrada>
-        <QRCode value="1" size={300}/>
-      </Entrada>
-    </div> */}
-      {(!valid && (
+      {(!valid && !validTickets && (
         <div className="flex flex-col-reverse md:grid md:grid-cols-2 pt-[60px]">
           <form
             onSubmit={handleSubmit}
@@ -313,36 +317,81 @@ export default function FormRegister() {
             </h2>
           </div>
         </div>
-      )) || (
-        <div className="pt-10">
-          <CardFinal data={dataForm} cantidad={cantidad}>
-            {preferenceId && (
-              <Wallet
-                initialization={{
-                  preferenceId: preferenceId,
-                  redirectMode: "modal",
-                }}
-              />
+      )) ||
+        (valid && !validTickets && (
+          <div className="pt-10">
+            <CardFinal data={dataForm} cantidad={cantidad}>
+              {preferenceId && (
+                <Wallet
+                  initialization={{
+                    preferenceId: preferenceId,
+                    redirectMode: "modal",
+                  }}
+                />
+              )}
+            </CardFinal>
+          </div>
+        )) ||
+        (validTickets && (
+          <div className="min-h-[500px]">
+            <div className="pt-[30px]">
+              <span
+                onClick={() => handleCreatePDF()}
+                className="bg-blues rounded-xl z-40 p-4 cursor-pointer text-3xl text-white"
+              >
+                Ver mis entradas +{" "}
+              </span>
+            </div>
+            {viewTickets && (
+              <div>
+                <div className="max-h-[400px] overflow-scroll ">
+                  <div className="" ref={toImageElem}>
+                    {listIdQr &&
+                      listIdQr?.map((item, key) => (
+                        <Entrada key={key}>
+                          <QRCode value={item?.ticketId} size={300} />
+                        </Entrada>
+                      ))}
+                  </div>
+                </div>
+                {showButton && (
+                  <PDFDownloadLink
+                    document={<Pdf images={listQR}></Pdf>}
+                    fileName="tickets.pdf"
+                    className="bg-wine p-4 text-white rounded-xl"
+                  >
+                    {({ blob, url, loading, error }) =>
+                      loading ? "Loading document..." : "Descargar PDF"
+                    }
+                  </PDFDownloadLink>
+                )}
+              </div>
             )}
-          </CardFinal>
-        </div>
-      )}
-      {params.id && (
-        <div className="absolute bg-black/70  w-full h-full top-0 left-0 backdrop-blur-lg flex justify-center items-center">
-          <div className="bg-[url('/priscilla.JPG')] bg-cover rounded-lg text-plate overflow-hidden">
+          </div>
+        ))}
+      {openModal && (
+        <div className="absolute z-50 bg-black/70  w-full h-full top-0 left-0 backdrop-blur-lg flex justify-center items-center">
+          <div className="bg-[url('/priscilla.JPG')] bg-cover md:max-w-[380px] rounded-lg text-plate overflow-hidden">
             <div className=" flex flex-col items-center gap-8 backdrop-blur-md  p-4 ">
               <p className="text-4xl">{dataModal.title}</p>
               <p className="text-xl">{dataModal.description}</p>
               <div>
-                <a
-                  className="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex"
-                  rel="noopener noreferrer"
-                  href="/"
+                <span
+                  className="p-4 bg-blues text-white rounded-2xl justify-items-center md:justify-items-start gap-2.5 inline-flex cursor-pointer"
+                  onClick={() => setOpenModal(false)}
                 >
                   <h2 className="text-center text-xl font-normal leading-7">
                     Aceptar
                   </h2>
-                </a>
+                </span>
+                {/* <PDFDownloadLink
+                  document={<Pdf images={listQR}></Pdf>}
+                  fileName="tickets.pdf"
+                >
+                  {({ blob, url, loading, error }) =>
+                    loading ? "Loading document..." : "Download now!"
+                  }
+                </PDFDownloadLink> */}
               </div>
             </div>
           </div>
