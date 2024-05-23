@@ -102,23 +102,58 @@ export default function FormRegister() {
   }, [dataForm]);
 
   useEffect(() => {
-    console.log("si nooo ");
-    if (params.id) {
-      var data = JSON.stringify({
-        id: params.id.toString(),
-      });
-      console.log(data, "***");
+    console.log('si nooo ')
+    if(params.id){
 
-      axios
-        .get("https://www.conciertoelevate.com/getTicketByIdMercadoPago", {
-          params: (data),
+      //const params = params.id//{ id: params.id }; // Ejemplo de parámetro
+      const url = `https://www.conciertoelevate.com/getTicketByIdMercadoPago?id=${encodeURIComponent(params.id)}`;
+      
+      const config = {
+        method: 'get',
+        url: url,
+        
+      };
+      console.log(config, 'config');
+      
+      axios(config)
+        .then(function (response) {
+          const dataRes = response.data;
+          setDataModal({
+            title: dataRes.status === 'approved' ? 'Gracias por la compra' : 'Error en el pago',
+            description: dataRes.status === 'approved' ? 'Te enviaremos un correo electrónico <br/> con tus entradas al concierto' : 'Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle',
+          });
+          console.log(JSON.stringify(response.data));
         })
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.error(error);
+        .catch(function (error) {
+          console.log(error, 'error chloe llorana');
         });
+
+     /* var data = JSON.stringify({
+        "id": params.id.toString()
+      })
+      console.log(data, '***')
+      var config = {
+        method: 'get',
+        url: "https://www.conciertoelevate.com/getTicketByIdMercadoPago",
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body : data
+      };
+      console.log(config, 'config')
+      
+      axios(config)
+      .then(function (response) {
+        const dataRes = response.data
+        setDataModal({
+          title: dataRes.status == 'approved' ? 'Gracias por la compra' : 'Error en el pago',
+          description: dataRes.status == 'approved' ? 'Te enviaremos un correo electrónico <br/> con tus entradas al concierto' : 'Vuelve a intentar el pago, si ya pagó, contáctenos para poder ayudarle',
+        })
+        console.log(JSON.stringify(response.data));
+      })
+      .catch(function (error) {
+        console.log(error, 'error chloe llorana');
+      });*/
     }
     // const node = document.querySelector('#entrada')
     // htmlToImage.toPng(node)
